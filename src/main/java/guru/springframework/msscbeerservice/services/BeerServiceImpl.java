@@ -8,6 +8,8 @@ import guru.springframework.msscbeerservice.web.model.BeerDto;
 import guru.springframework.msscbeerservice.web.model.BeerPagedList;
 import guru.springframework.msscbeerservice.web.model.BeerStyleEnum;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -24,13 +26,16 @@ import static java.util.Arrays.stream;
  */
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class BeerServiceImpl implements BeerService {
     private final BeerRepository beerRepository;
     private final BeerMapper beerMapper;
 
     @Override
+    @Cacheable(value = "beerListCache", condition = "#showInventoryOnHand == false ")
     public BeerPagedList listBeers(String beerName, BeerStyleEnum beerStyle, Boolean showInventoryOnHand, PageRequest pageRequest) {
 
+        log.info("Call of the service get all beers");
         BeerPagedList beerPagedList;
         Page<Beer> beerPage;
 
@@ -48,7 +53,7 @@ public class BeerServiceImpl implements BeerService {
         }
 
         Function<Beer, BeerDto> mapBeerToDto =
-                showInventoryOnHand ? beerMapper::beerToBeerDto: beerMapper::beerToBeerDtoNoInventory;
+                showInventoryOnHand ? beerMapper::beerToBeerDto : beerMapper::beerToBeerDtoNoInventory;
 
         beerPagedList = new BeerPagedList(beerPage
                 .getContent()
@@ -64,9 +69,10 @@ public class BeerServiceImpl implements BeerService {
     }
 
 
-
     @Override
+    @Cacheable(cacheNames = "beerCache", key = "#beerId", condition = "#showInventoryOnHand == false ")
     public BeerDto getById(UUID beerId, Boolean showInventoryOnHand) {
+        log.info("Call of the service get a beer");
         Beer beerById = beerRepository.findById(beerId).orElseThrow(NotFoundException::new);
         return showInventoryOnHand ? beerMapper.beerToBeerDto(beerById) : beerMapper.beerToBeerDtoNoInventory(beerById);
     }
@@ -86,5 +92,13 @@ public class BeerServiceImpl implements BeerService {
         beer.setUpc(beerDto.getUpc());
 
         return beerMapper.beerToBeerDto(beerRepository.save(beer));
+    }
+
+    @Override
+    @Cacheable(cacheNames = "beerUpcCache", key = "#upc", condition = "#showInventoryOnHand == false ")
+    public BeerDto getByUpc(String upc, Boolean showInventoryOnHand) {
+        log.info("Call of the service get a beer");
+        Beer beer = beerRepository.findByUpc(upc).orElseThrow(NotFoundException::new);
+        return showInventoryOnHand ? beerMapper.beerToBeerDto(beer) : beerMapper.beerToBeerDtoNoInventory(beer);
     }
 }
