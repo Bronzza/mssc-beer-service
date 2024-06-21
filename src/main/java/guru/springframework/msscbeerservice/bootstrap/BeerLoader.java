@@ -1,14 +1,20 @@
 package guru.springframework.msscbeerservice.bootstrap;
 
+import guru.springframework.msscbeerservice.domain.Beer;
 import guru.springframework.msscbeerservice.repositories.BeerRepository;
+import common.model.BeerStyleEnum;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * Created by jt on 2019-05-17.
  */
-//@Component
+@Component
 public class BeerLoader implements CommandLineRunner {
 
     public static final String BEER_1_UPC = "0631234200036";
@@ -26,7 +32,44 @@ public class BeerLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //using data.sql file now
-        //   loadBeerObjects();
+        if (beerRepository.count() == 0) {
+            loadBeerObjects();
+        }
+
+    }
+
+    private void loadBeerObjects() {
+        List<Beer> beersToSave = new ArrayList<Beer>();
+        beersToSave.add(Beer.builder()
+                .beerName("Mango Bobs")
+                .beerStyle(BeerStyleEnum.IPA.name())
+                .minOnHand(12)
+                .quantityToBrew(200)
+                .upc(BEER_1_UPC)
+                .price(new BigDecimal("12.95"))
+                .version(1L)
+                .build());
+
+        beersToSave.add(Beer.builder()
+                .beerName("Galaxy Cat")
+                .beerStyle(BeerStyleEnum.PALE_ALE.name())
+                .minOnHand(12)
+                .quantityToBrew(200)
+                .upc(BEER_2_UPC)
+                .price(new BigDecimal("12.95"))
+                .version(1L)
+                .build());
+
+        beersToSave.add(Beer.builder()
+                .beerName("Pinball Porter")
+                .beerStyle(BeerStyleEnum.PORTER.name())
+                .minOnHand(12)
+                .quantityToBrew(200)
+                .upc(BEER_3_UPC)
+                .price(new BigDecimal("12.95"))
+                .version(1L)
+                .build());
+
+        beerRepository.saveAll(beersToSave);
     }
 }

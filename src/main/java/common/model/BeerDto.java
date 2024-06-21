@@ -1,4 +1,4 @@
-package guru.springframework.msscbeerservice.web.model;
+package common.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
