@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @Disabled // utility for manual testing
-@SpringBootTest
+//@SpringBootTest
 class BeerInventoryServiceRestTemplateImplTest {
 
     @Autowired
